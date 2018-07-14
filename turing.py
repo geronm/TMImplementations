@@ -112,7 +112,7 @@ class TuringMachine(object):
 
         return input_list
 
-    def simulate(self, input_symbol_list, print_intermediate_tape=True, max_num_iters=500):
+    def simulate(self, input_symbol_list, print_intermediate_tape=True, max_num_iters=float('inf')):
         '''
             Simulate the tm. Pretty straightforward implementation.
 
