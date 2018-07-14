@@ -73,12 +73,12 @@ def main():
     
     tm = TuringMachine(alphabet, rules)
 
-    accept, state = tm.simulate(input_list)
+    accept, tape, num_steps = tm.simulate(input_list)
 
     print 'Accepted: %s' % repr(accept)
-
-    print 'Tape state raw:'
-    print state
+    print 'Num steps: %d' % num_steps
+    print 'Tape state:'
+    tape.print_tape()
 
     # Halt
 

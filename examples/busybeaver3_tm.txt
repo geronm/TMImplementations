@@ -1,0 +1,7 @@
+zero one
+s0 zero s1 one right
+s0 one s1 one halt_accept
+s1 zero s2 zero right
+s1 one s1 one right
+s2 zero s2 one left
+s2 one s0 one left

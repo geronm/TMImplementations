@@ -6,6 +6,7 @@
 
 import attr
 import re
+import math
 import numpy as np
 
 @attr.s
@@ -18,11 +19,11 @@ class TuringTape(object):
     default_symbol = attr.ib()
 
     def print_tape(self):
-        alphabet = list
+        alphabet = set([self.default_symbol] + self.tape_state)
         head_msg = '^%s' % (self.cur_tm_state)
         max_inp_symbol_length = max(max(len(sym) for sym in self.tape_state), len(head_msg)+1)
 
-        alphabet_to_padded = {sym:(sym + ' '*(max_inp_symbol_length - len(sym))) for sym in self.tape_state}
+        alphabet_to_padded = {sym:(sym + ' '*(max_inp_symbol_length - len(sym))) for sym in alphabet}
 
         # First, print the tape symbols.
         PREFIX='... '
@@ -63,6 +64,7 @@ class TuringMachine(object):
         self.default_input = self.alphabet[0]
         self.states = list(set([rule[0] for rule in rules]))
         self.start_state = rules[0][0]
+        self.rules = list(rules)
         self.rule_dict = {}
         for rule in rules:
             print 'Parsing rule: %s ...' % repr(rule)
@@ -171,11 +173,107 @@ class TuringMachine(object):
                 tape.tape_state.insert(0, self.default_input)
             elif tape.cur_tm_head_pos >= tape.tape_hi:
                 tape.tape_hi += 1
-                tape.tape_state.insert(0, self.default_input)
+                tape.tape_state.append(self.default_input)
 
             its += 1
 
         if print_intermediate_tape:
             tape.print_tape()
 
-        return accepted, tape
+        return accepted, tape, its
+
+
+    def _int_to_binary(self, num, word_size, sym_0, sym_1):
+        binary_list = []
+
+        assert word_size >= 1
+        num_tmp = num
+        while num_tmp > 0 and len(binary_list) < word_size:
+            num_tmp_old = num_tmp
+
+            if num_tmp % 2 == 0:
+                binary_list = [sym_0] + binary_list
+            else:
+                binary_list = [sym_1] + binary_list
+                num_tmp -= 1
+            assert num_tmp % 2 == 0
+            num_tmp //= 2
+
+            assert num_tmp < num_tmp_old
+
+        while len(binary_list) < word_size:
+            binary_list = [sym_0] + binary_list
+
+        return binary_list
+
+
+    def to_binary(self):
+        '''
+            Takes the rules for a Turing Machine and converts
+            them to a binary representation
+        '''
+        # Use first two symbols of alphabet as 0 and 1 bits, respectively.
+        bit_syms = tuple(self.alphabet[:2])
+
+        sym_list = []
+
+        # First, write the word size. Need to be able to represent
+        # inputs and states in this word size. Then, we write this word
+        # size using the following code:
+        #
+        # 00 = 0
+        # 01 = 1
+        # 11 = Done
+        # 10 unused
+        word_size = int(math.ceil(max(math.log(len(self.states), 2),
+                                      math.log(len(self.alphabet), 2))))
+        assert word_size >= 1
+        word_size_tmp = word_size
+        while word_size_tmp > 0:
+            word_size_tmp_old = word_size_tmp
+
+            if word_size_tmp % 2 == 0:
+                sym_list = [bit_syms[0], bit_syms[0]] + sym_list
+            else:
+                sym_list = [bit_syms[0], bit_syms[1]] + sym_list
+                word_size_tmp -= 1
+            assert word_size_tmp % 2 == 0
+            word_size_tmp //= 2
+
+            assert word_size_tmp < word_size_tmp_old, (word_size_tmp, word_size_tmp_old)
+
+        sym_list += [bit_syms[1], bit_syms[1]]
+
+        # Next write the total number of states in binary. Max length
+        # is word_size. All-zero vector would mean max length is
+        # 2**word_size
+        sym_list += self._int_to_binary(len(self.states), word_size, bit_syms[0], bit_syms[1])
+
+        # Now, write rule list in binary, 5 at a time. For action,
+        # use key
+        #
+        # 000 = left
+        # 001 = right
+        # 010 = halt_accept
+        # 011 = halt_reject
+        # 100 = noop
+        DIRECTION_TO_CODE = {'left':        [bit_syms[0], bit_syms[0], bit_syms[0]],
+                             'right':       [bit_syms[0], bit_syms[0], bit_syms[1]],
+                             'halt_accept': [bit_syms[0], bit_syms[1], bit_syms[0]],
+                             'halt_reject': [bit_syms[0], bit_syms[1], bit_syms[1]],
+                             'noop':        [bit_syms[1], bit_syms[0], bit_syms[0]], }
+        assert len(self.rules) == len(self.states) * len(self.alphabet)
+        for rule in self.rules:
+            state_from, input_from, state_to, input_to, direction = rule
+
+            state_from_code = self._int_to_binary(self.states.index(state_from), word_size, bit_syms[0], bit_syms[1])
+            input_from_code = self._int_to_binary(self.alphabet.index(input_from), word_size, bit_syms[0], bit_syms[1])
+            state_to_code = self._int_to_binary(self.states.index(state_to), word_size, bit_syms[0], bit_syms[1])
+            input_to_code = self._int_to_binary(self.alphabet.index(input_to), word_size, bit_syms[0], bit_syms[1])
+            direction_code = DIRECTION_TO_CODE[direction]
+
+            sym_list += (state_from_code + input_from_code + state_to_code + input_to_code + direction_code)
+        
+        print sym_list
+
+        return sym_list
