@@ -5,13 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-struct tmRule {
-    std::string state_from;
-    std::string input_from;
-    std::string state_to;
-    std::string input_to;
-    std::string direction;
-};
+#include "turing_common.hpp"
 
 int main(int argc, char* argv[]) {
     using namespace std;
