@@ -4,6 +4,10 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
+#include <memory>
+#include <utility>
 
 #include "turing_common.hpp"
 
@@ -19,33 +23,69 @@ int main(int argc, char* argv[]) {
             tmInputStream.open(argv[1], ios_base::in);
 
             // Extract first line specially; it contains alphabet
-            char c = 0;
-            while (c != '\n' && tmInputStream.is_open() && !tmInputStream.eof()) {
-                tmInputStream.get(c);
-                cout << c;
+            vector<shared_ptr<string> > alphabet;
+
+            {
+                char c;
+                shared_ptr<string> next_string(new string(""));
+                while (c != '\n' && tmInputStream.is_open() && !tmInputStream.eof()) {
+                    tmInputStream.get(c);
+                    cout << c;
+
+                    if (c == ' ') {
+                        if (next_string->size() > 0) {
+                            alphabet.push_back(move(next_string));
+                        }
+                        next_string = make_shared<string>("");
+                    } else {
+                        next_string->push_back(c);
+                    }
+                }
+                if (next_string->size() > 0) {
+                    alphabet.push_back(move(next_string));
+                }
+                cout << endl;
             }
 
-            // Now read rules of Turing Machine, lines of 5 symbols
-            // string state_from;
-            // string input_from;
-            // string state_to;
-            // string input_to;
-            // string direction;
-            tmRule rule;
-            while (tmInputStream.is_open() && !tmInputStream.eof()) {
-                tmInputStream >> rule.state_from;
-                tmInputStream >> rule.input_from;
-                tmInputStream >> rule.state_to;
-                tmInputStream >> rule.input_to;
-                tmInputStream >> rule.direction;
-                
-                cout << rule.state_from << " ";
-                cout << rule.input_from << " ";
-                cout << rule.state_to << " ";
-                cout << rule.input_to << " ";
-                cout << rule.direction << endl;
-                cout << ":)" << endl;
+            // Check Alphabet
+            cout << "Alphabet: ";
+            for (int i=0; i < alphabet.size(); i++) {
+                cout << (*(alphabet[i])) << " ";
             }
+            cout << endl;
+
+            // Now read rules of Turing Machine, lines of 5 symbols
+            // state_from, input_from, state_to, input_to, direction
+            vector<shared_ptr<tmRule> > rules;
+            while (tmInputStream.is_open() && !tmInputStream.eof()) {
+                shared_ptr<tmRule> next_rule (new tmRule());
+
+                tmInputStream >> (next_rule->state_from);
+                tmInputStream >> (next_rule->input_from);
+                tmInputStream >> (next_rule->state_to);
+                tmInputStream >> (next_rule->input_to);
+                tmInputStream >> (next_rule->direction);
+                
+                // cout << (next_rule->state_from) << " ";
+                // cout << (next_rule->input_from) << " ";
+                // cout << (next_rule->state_to) << " ";
+                // cout << (next_rule->input_to) << " ";
+                // cout << (next_rule->direction) << endl;
+                // cout << ":)" << endl;
+
+                rules.push_back(move(next_rule));
+            }
+
+            // Check Rules
+            cout << "Rules:" << endl;
+            for (int i=0; i < rules.size(); i++) {
+                cout << (*(rules[i])).state_from << " ";
+                cout << (*(rules[i])).input_from << " ";
+                cout << (*(rules[i])).state_to << " ";
+                cout << (*(rules[i])).input_to << " ";
+                cout << (*(rules[i])).direction << endl;
+            }
+            cout << endl;
 
             tmInputStream.close();
         } catch (ios_base::failure &IOError) {
