@@ -16,6 +16,9 @@ int main(int argc, char* argv[]) {
 
     ifstream tmInputStream;
 
+    vector<shared_ptr<string> > alphabet;
+    vector<shared_ptr<tmRule> > rules;
+
     // Open TM file
     if (argc > 1) {
         try {
@@ -23,8 +26,6 @@ int main(int argc, char* argv[]) {
             tmInputStream.open(argv[1], ios_base::in);
 
             // Extract first line specially; it contains alphabet
-            vector<shared_ptr<string> > alphabet;
-
             {
                 char c;
                 shared_ptr<string> next_string(new string(""));
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
             }
 
             // Check Alphabet
-            cout << "Alphabet: " << alphabet.size() << endl;
+            cout << "Alphabet (" << alphabet.size() << "):" << endl;
             for (int i=0; i < alphabet.size(); i++) {
                 cout << (*(alphabet[i])) << endl;
             }
@@ -55,7 +56,6 @@ int main(int argc, char* argv[]) {
 
             // Now read rules of Turing Machine, lines of 5 symbols
             // state_from, input_from, state_to, input_to, direction
-            vector<shared_ptr<tmRule> > rules;
             while (tmInputStream.is_open() && !tmInputStream.eof()) {
                 shared_ptr<tmRule> next_rule (new tmRule());
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
             }
 
             // Check Rules
-            cout << "Rules:" << endl;
+            cout << "Rules (" << rules.size() << "):" << endl;
             for (int i=0; i < rules.size(); i++) {
                 cout << (*(rules[i])).state_from << ", ";
                 cout << (*(rules[i])).input_from << ", ";
@@ -85,7 +85,11 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    cout << "Successfully loaded TM model!" << endl;
+    cout << "Successfully loaded alphabet and rules!" << endl;
+
+    TuringMachine tm (alphabet, rules);
+
+    cout << "Successfully created TM model!" << endl;
 
     return 0;
 }

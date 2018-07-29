@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 enum tmDirection {left, right, noop, halt_accept, halt_reject};
 
@@ -18,8 +19,9 @@ class TuringMachine {
 
     public:
 
-    TuringMachine(std::vector<std::string> alphabet,
-                  std::vector<tmRule> rules);
+    TuringMachine(
+        std::vector<std::shared_ptr<std::string> > alphabet,
+        std::vector<std::shared_ptr<tmRule> > rules);
 
     // private:
 
