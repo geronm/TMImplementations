@@ -28,16 +28,15 @@ int main(int argc, char* argv[]) {
             {
                 char c;
                 shared_ptr<string> next_string(new string(""));
-                while (c != '\n' && tmInputStream.is_open() && !tmInputStream.eof()) {
+                while (c != '\n' && c != '\r' && tmInputStream.is_open() && !tmInputStream.eof()) {
                     tmInputStream.get(c);
-                    cout << c;
 
                     if (c == ' ') {
                         if (next_string->size() > 0) {
                             alphabet.push_back(move(next_string));
                         }
                         next_string = make_shared<string>("");
-                    } else {
+                    } else if (c != '\n' && c != '\r') {
                         next_string->push_back(c);
                     }
                 }
@@ -48,9 +47,9 @@ int main(int argc, char* argv[]) {
             }
 
             // Check Alphabet
-            cout << "Alphabet: ";
+            cout << "Alphabet: " << alphabet.size() << endl;
             for (int i=0; i < alphabet.size(); i++) {
-                cout << (*(alphabet[i])) << " ";
+                cout << (*(alphabet[i])) << endl;
             }
             cout << endl;
 
@@ -65,13 +64,6 @@ int main(int argc, char* argv[]) {
                 tmInputStream >> (next_rule->state_to);
                 tmInputStream >> (next_rule->input_to);
                 tmInputStream >> (next_rule->direction);
-                
-                // cout << (next_rule->state_from) << " ";
-                // cout << (next_rule->input_from) << " ";
-                // cout << (next_rule->state_to) << " ";
-                // cout << (next_rule->input_to) << " ";
-                // cout << (next_rule->direction) << endl;
-                // cout << ":)" << endl;
 
                 rules.push_back(move(next_rule));
             }
@@ -79,10 +71,10 @@ int main(int argc, char* argv[]) {
             // Check Rules
             cout << "Rules:" << endl;
             for (int i=0; i < rules.size(); i++) {
-                cout << (*(rules[i])).state_from << " ";
-                cout << (*(rules[i])).input_from << " ";
-                cout << (*(rules[i])).state_to << " ";
-                cout << (*(rules[i])).input_to << " ";
+                cout << (*(rules[i])).state_from << ", ";
+                cout << (*(rules[i])).input_from << ", ";
+                cout << (*(rules[i])).state_to << ", ";
+                cout << (*(rules[i])).input_to << ", ";
                 cout << (*(rules[i])).direction << endl;
             }
             cout << endl;
@@ -93,7 +85,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    cout << "Hello, World!" << endl;
+    cout << "Successfully loaded TM model!" << endl;
 
     return 0;
 }
