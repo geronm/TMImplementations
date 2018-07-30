@@ -23,14 +23,20 @@ class TuringMachine {
         std::vector<std::shared_ptr<std::string> > alphabet,
         std::vector<std::shared_ptr<tmRule> > rules);
 
-    // private:
+    ~TuringMachine(void);
 
-    // std::vector<std::string> alphabet;
-    // std::vector<tmRule> rules;
-    // std::vector<std::string> states;
-    // std::vector<std::string> start_state;
-    // std::vector<std::string> rule_dict;
+    void print_self (void);
 
+    private:
+
+    std::vector<std::shared_ptr<std::string> > alphabet;
+    std::vector<std::shared_ptr<tmRule> > rules;
+    std::vector<std::shared_ptr<std::string> > states;
+    std::string start_state;
+    std::string default_symbol;
+    std::vector<std::vector<int> > new_state_map; // array mapping to new state index
+    std::vector<std::vector<int> > new_input_map; // array mapping to new input index
+    std::vector<std::vector<tmDirection> > direction_map; // array mapping to new state
 
     /**
      * Python code for reference:

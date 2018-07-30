@@ -16,6 +16,9 @@ int main(int argc, char* argv[]) {
 
     ifstream tmInputStream;
 
+    TuringMachine * tmPtr;
+    {
+
     vector<shared_ptr<string> > alphabet;
     vector<shared_ptr<tmRule> > rules;
 
@@ -87,7 +90,12 @@ int main(int argc, char* argv[]) {
     }
     cout << "Successfully loaded alphabet and rules!" << endl;
 
-    TuringMachine tm (alphabet, rules);
+    // TuringMachine tm (alphabet, rules);
+
+    tmPtr = (new TuringMachine (alphabet, rules));
+    }
+ 
+    tmPtr->print_self();
 
     cout << "Successfully created TM model!" << endl;
 
